@@ -145,84 +145,6 @@ namespace BaSRopeDart
             }
         }
 
-        /*private void CreateRopeBetween(GameObject objectA, GameObject objectB)
-        {
-            Item itemA;
-            Item itemB;
-            if (objectA.TryGetComponent<Item>(out itemA) && objectB.TryGetComponent<Item>(out itemB))
-            {
-                Transform ropePointA;
-                if (!itemA.TryGetCustomReference("RopePoint", out ropePointA))
-                    ropePointA = itemA.transform;
-                Transform ropePointB;
-                if (!itemB.TryGetCustomReference("RopePoint", out ropePointB))
-                    ropePointB = itemB.transform;
-
-                RemoveRopeBetween(objectA, objectB);
-
-                //add rope from A to B
-                {
-                    objectA.SetActive(false);
-                    RopeSimple ropeComponent = ropePointA.gameObject.AddComponent<RopeSimple>();
-
-                    AssignValuesFromModule(ropeComponent);
-                    ropeComponent.targetAnchor = ropePointB;
-                    ropeComponent.connectedBody = objectB.GetComponent<Rigidbody>();
-                    objectA.SetActive(true);
-                }
-                
-                /*
-                //add rope from B to A
-                {
-                    objectB.SetActive(false);
-                    RopeSimple ropeComponent = ropePointB.gameObject.AddComponent<RopeSimple>();
-
-                    AssignValuesFromModule(ropeComponent);
-                    ropeComponent.targetAnchor = ropePointA;
-                    ropeComponent.connectedBody = objectA.GetComponent<Rigidbody>();
-                    objectB.SetActive(true);
-                }
-
-                Debug.Log("made rope maybe");
-            }*/
-
-            /*
-            Rigidbody objectbRigidbody;
-            if (objectB.TryGetComponent<Rigidbody>(out objectbRigidbody))
-            {
-
-                
-                if (objectA.TryGetComponent<Item>(out itemA))
-                {
-                    Transform ropePoint = itemA.transform;
-                    if (itemA.GetCustomReference("RopePoint", true) != null)
-                        ropePoint = itemA.GetCustomReference("RopePoint", false);
-
-                    RemoveRope(objectA);
-
-                    objectA.SetActive(false);
-
-                    objectA.AddComponent<RopeSimple>();
-
-                    RopeSimple ropeComponent = objectA.GetComponent<RopeSimple>();
-
-                    AssignValuesFromModule(ropeComponent);
-                    ropeComponent.targetAnchor = ropePoint;
-                    //ropeComponent.rigidA = objectA.GetComponent<Rigidbody>();
-                    //ropeComponent.rigidB = objectB.GetComponent<Rigidbody>();
-                    ropeComponent.connectedBody = objectbRigidbody;
-
-                    objectA.SetActive(true);
-
-                    Debug.Log($"created rope");
-                    return;
-                }
-            }
-
-            //Debug.Log("failed to create rope for whatever reason");
-
-        }*/
-
         private void CreateSmartRopeBetween(GameObject objectA, GameObject objectB)
         {
             Item itemA;
@@ -252,59 +174,16 @@ namespace BaSRopeDart
 
                 objectA.SetActive(true);
 
-                /*
-                //rope simple for visuals only, and only make 1
-                ropePointA.gameObject.SetActive(false);
-                RopeSimple ropeSimple = ropePointA.gameObject.AddComponent<RopeSimple>();
-                ropeSimple.targetAnchor = ropePointB;
-                ropeSimple.connectedBody = objectB.GetComponent<Rigidbody>();
-                ropeSimple.maxDistance = Mathf.Infinity;
-                AssignRopeSimpleValuesFromModule(ropeSimple);
-
-                ropeComponent.ropeSimple = ropeSimple;
-                */
 
                 ropePointA.gameObject.SetActive(true);
                 
 
                 Debug.Log("made rope maybe");
+
+                return;
             }
 
-            /*
-            Rigidbody objectbRigidbody;
-            if (objectB.TryGetComponent<Rigidbody>(out objectbRigidbody))
-            {
-
-                
-                if (objectA.TryGetComponent<Item>(out itemA))
-                {
-                    Transform ropePoint = itemA.transform;
-                    if (itemA.GetCustomReference("RopePoint", true) != null)
-                        ropePoint = itemA.GetCustomReference("RopePoint", false);
-
-                    RemoveRope(objectA);
-
-                    objectA.SetActive(false);
-
-                    objectA.AddComponent<RopeSimple>();
-
-                    RopeSimple ropeComponent = objectA.GetComponent<RopeSimple>();
-
-                    AssignValuesFromModule(ropeComponent);
-                    ropeComponent.targetAnchor = ropePoint;
-                    //ropeComponent.rigidA = objectA.GetComponent<Rigidbody>();
-                    //ropeComponent.rigidB = objectB.GetComponent<Rigidbody>();
-                    ropeComponent.connectedBody = objectbRigidbody;
-
-                    objectA.SetActive(true);
-
-                    Debug.Log($"created rope");
-                    return;
-                }
-            }*/
-
-            //Debug.Log("failed to create rope for whatever reason");
-
+            Debug.Log("failed to create rope for whatever reason");
         }
 
         public static Transform GetRopePoint(Item item)
@@ -331,6 +210,8 @@ namespace BaSRopeDart
             ropeComponent.audioMaxForce = module.audioMaxForce;
             ropeComponent.audioMinSpeed = module.audioMinSpeed;
             ropeComponent.audioMaxSpeed = module.audioMaxSpeed;
+
+            ropeComponent.enableCollision = module.enableCollisions;
 
         }
 

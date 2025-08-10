@@ -1,5 +1,6 @@
 ﻿using Sirenix.OdinInspector;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,6 +36,8 @@ namespace BaSRopeDart
 
         public float distance;
 
+        public Handle lengthHandle;
+
         //visual representation of this rope
         public Material material;
 
@@ -58,22 +61,22 @@ namespace BaSRopeDart
         }
 
         public string effectId;
-        public float audioMinForce = 400f;
-        public float audioMaxForce = 1000f;
-        public float audioMinSpeed = 0.25f;
-        public float audioMaxSpeed = 2f;
+        public float audioMinForce;
+        public float audioMaxForce;
+        public float audioMinSpeed;
+        public float audioMaxSpeed;
 
 
         //parameters
-        public float spring = 0;
-        public float damper = 0;
-        public float maxDistance = 10f;
-        public float minDistance = 0.01f;
-        public bool enableCollision = false;
+        public float spring;
+        public float damper;
+        public float maxDistance;
+        public float minDistance;
+        public bool enableCollision;
 
 
 
-
+        //basically copied from ropesimple (but with a few changes to the spring joint creation), until stated otherwise
         public void Awake()
         {
             if (objectA == null)
@@ -142,6 +145,16 @@ namespace BaSRopeDart
                 effectInstance.SetIntensity(0f);
             }
 
+            //NEW STUFF
+
+            //not sure if mesh is the best object to add the handle to, but i figure it's already in the right position and angle..?
+            lengthHandle = mesh.gameObject.AddComponent<Handle>();
+
+            lengthHandle.interactableId = "ClimbRopeVertical";
+            lengthHandle.axisLength = 10.0f; //this number doesn't seem to change anything
+            lengthHandle.orientationDefaultLeft = lengthHandle.AddOrientation(Side.Left, Vector3.zero, new Quaternion());
+            lengthHandle.orientationDefaultRight = lengthHandle.AddOrientation(Side.Right, Vector3.zero, new Quaternion());
+
         }
 
         //don't know when this gets called, just copying it from rope simple
@@ -165,7 +178,7 @@ namespace BaSRopeDart
 
         /**
          * <summary>
-         * Destroys the joint, mesh, and effects, hopefully without leaving anything behind.
+         * Destroys the joint, mesh, and effects, without leaving anything behind.
          * </summary>
          * 
          */
@@ -174,12 +187,14 @@ namespace BaSRopeDart
             Destroy(springJoint);
             effectInstance?.Stop();
             effectInstance?.Despawn();
+            lengthHandle.enabled = false;
+            Destroy(lengthHandle);
             mesh.enabled = false;
             Destroy(mesh);
             Destroy(this);
         }
 
-        //also just copying from rope simple..
+        //also just copying from rope simple.. until stated otherwise >:)
         protected void LateUpdate()
         {
             if (rigidA.IsSleeping())
@@ -210,7 +225,7 @@ namespace BaSRopeDart
 
             if (effectInstance != null)
             {
-                float intensity = Mathf.InverseLerp(audioMinForce, audioMaxForce, springJoint.currentForce.magnitude) * 
+                float intensity = Mathf.InverseLerp(audioMinForce, audioMaxForce, springJoint.currentForce.magnitude) *
                     Mathf.InverseLerp(audioMinSpeed, audioMaxSpeed, rigidA.velocity.magnitude);
                 effectInstance.SetIntensity(intensity);
                 if (!effectInstance.isPlaying)
@@ -218,6 +233,19 @@ namespace BaSRopeDart
                     effectInstance.Play();
                 }
             }
+
+            //NEW STUFF
+
+            lengthHandle.transform.position = meshTransform.position;
+            lengthHandle.transform.rotation = meshTransform.rotation;
+
+            float safeDistance = Mathf.Max(0.1f, distance);
+
+            lengthHandle.axisLength = safeDistance;
+            lengthHandle.SetTouchRadius(lengthHandle.touchRadius, true);
+
+            //lengthHandle.StartCoroutine(UpdateHandleLength());
+            //lengthHandle.SetTouchRadius(lengthHandle.touchRadius, true);
         }
 
     }

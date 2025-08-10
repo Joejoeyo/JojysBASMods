@@ -24,6 +24,7 @@ namespace BaSRopeDart
         public float audioMaxForce = 1000f;
         public float audioMinSpeed = 0.25f;
         public float audioMaxSpeed = 2f;
+        public bool enableCollisions = true;
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
