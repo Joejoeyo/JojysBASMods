@@ -16,23 +16,12 @@ namespace BaSRopeDart
         public List<Item> attachedItems;
         public Item ropeSpool;
         public Item ropeDart;
-        public float totalLength = 100f;
+        public float totalLength = 10f;
         public float slack;
 
         protected ItemModuleRope module;
 
-        public float maxDistance;
-        public float spring = 10000f;
-        public float damper;
         public Material material = null;
-        public float radius = 0.015f;
-        public float tilingOffset = 10f;
-
-        public string effectId;
-        public float audioMinForce = 400f;
-        public float audioMaxForce = 1000f;
-        public float audioMinSpeed = 0.25f;
-        public float audioMaxSpeed = 2f;
 
         protected void Awake()
         {
@@ -46,7 +35,7 @@ namespace BaSRopeDart
             {
                 foreach (Item attachedItem in attachedItems)
                 {
-                    RemoveRope(item.gameObject);
+                    RemoveSmartRope(item);
                 }
             }
             else
@@ -111,18 +100,13 @@ namespace BaSRopeDart
             Debug.Log("No rope to disconnect");
         }
 
-        private void RemoveSmartRope(GameObject componentOwner)
+        private void RemoveSmartRope(Item item)
         {
-            RopeSmart ropeComponent;
+            GameObject componentOwner = item.gameObject;
 
-            if (componentOwner.TryGetComponent<RopeSmart>(out ropeComponent))
+            if (componentOwner.TryGetComponent<RopeSmart>(out RopeSmart ropeComponent))
             {
-                GameObject.Destroy(ropeComponent);
-                RopeSimple ropeSimple;
-                if (componentOwner.TryGetComponent<RopeSimple>(out ropeSimple))
-                {
-                    GameObject.Destroy(ropeSimple);
-                }
+                ropeComponent.Destroy();
                 Debug.Log("disconnected rope");
                 return;
             }
@@ -144,17 +128,19 @@ namespace BaSRopeDart
             }
         }
 
-        private void RemoveSmartRopeBetween(GameObject objectA, GameObject objectB)
+        private void RemoveSmartRopeBetween(Item itemA, Item itemB)
         {
+            GameObject objectA = itemA.gameObject;
+            GameObject objectB = itemB.gameObject;
             RopeSmart ropeComponent;
             if (objectA.TryGetComponent<RopeSmart>(out ropeComponent) && ropeComponent?.objectB == objectB)
             {
-                GameObject.Destroy(ropeComponent);
+                ropeComponent.Destroy();
                 Debug.Log("disconnected rope on A");
             }
             if (objectB.TryGetComponent<RopeSmart>(out ropeComponent) && ropeComponent?.objectB == objectA)
             {
-                GameObject.Destroy(ropeComponent);
+                ropeComponent.Destroy();
                 Debug.Log("disconnected rope on B");
             }
         }
@@ -243,57 +229,43 @@ namespace BaSRopeDart
             Item itemB;
             if (objectA.TryGetComponent<Item>(out itemA) && objectB.TryGetComponent<Item>(out itemB))
             {
-                Transform ropePointA;
-                if (!itemA.TryGetCustomReference("RopePoint", out ropePointA))
-                    ropePointA = itemA.transform;
-                Transform ropePointB;
+                Transform ropePointA = GetRopePoint(itemA);
+                Transform ropePointB = GetRopePoint(itemB);
                 if (!itemB.TryGetCustomReference("RopePoint", out ropePointB))
                     ropePointB = itemB.transform;
 
                 //RemoveRopeBetween(objectA, objectB);
-                RemoveSmartRope(objectA);
+                RemoveSmartRope(itemA);
 
                 //add rope from A to B
-                {
-                    objectA.SetActive(false);
-                    RopeSmart ropeComponent = objectA.AddComponent<RopeSmart>();
 
-                    AssignValuesFromModule(ropeComponent);
-                    ropeComponent.objectA = objectA;
-                    ropeComponent.objectB = objectB;
-                    ropeComponent.ropePointA = ropePointA;
-                    ropeComponent.ropePointB = ropePointB;
+                objectA.SetActive(false);
+                RopeSmart ropeComponent = objectA.AddComponent<RopeSmart>();
 
-                    
+                AssignValuesFromModule(ropeComponent);
+                ropeComponent.objectA = objectA;
+                ropeComponent.objectB = objectB;
+                ropeComponent.ropePointA = ropePointA;
+                ropeComponent.ropePointB = ropePointB;
 
-                    objectA.SetActive(true);
-                }
+
+
+                objectA.SetActive(true);
 
                 /*
-                //add rope from B to A
-                {
-                    objectB.SetActive(false);
-                    RopeSimple ropeComponent = ropePointB.gameObject.AddComponent<RopeSimple>();
-
-                    AssignValuesFromModule(ropeComponent);
-                    ropeComponent.targetAnchor = ropePointA;
-                    ropeComponent.connectedBody = objectA.GetComponent<Rigidbody>();
-                    objectB.SetActive(true);
-                }*/
-
                 //rope simple for visuals only, and only make 1
                 ropePointA.gameObject.SetActive(false);
                 RopeSimple ropeSimple = ropePointA.gameObject.AddComponent<RopeSimple>();
                 ropeSimple.targetAnchor = ropePointB;
                 ropeSimple.connectedBody = objectB.GetComponent<Rigidbody>();
                 ropeSimple.maxDistance = Mathf.Infinity;
-                ropeSimple.minDistance = 0;
-                ropeSimple.spring = 0;
-                ropeSimple.damper = 0;
-                ropeSimple.material = material;
+                AssignRopeSimpleValuesFromModule(ropeSimple);
+
+                ropeComponent.ropeSimple = ropeSimple;
+                */
 
                 ropePointA.gameObject.SetActive(true);
-
+                
 
                 Debug.Log("made rope maybe");
             }
@@ -335,23 +307,51 @@ namespace BaSRopeDart
 
         }
 
+        public static Transform GetRopePoint(Item item)
+        {
+            Transform ropePoint;
+            if (!item.TryGetCustomReference("RopePoint", out ropePoint))
+                ropePoint = item.transform;
+            return ropePoint;
+        }
+
         private void AssignValuesFromModule(RopeSmart ropeComponent)
         {
             ropeComponent.maxDistance = module.maxDistance;
-            //ropeComponent.minDistance = module.minDistance;
+            ropeComponent.minDistance = module.minDistance;
             ropeComponent.spring = module.spring;
             ropeComponent.damper = module.damper;
 
+            ropeComponent.material = material;
+            ropeComponent.radius = module.radius;
+            ropeComponent.tilingOffset = module.tilingOffset;
+
+            ropeComponent.effectId = module.effectId;
+            ropeComponent.audioMinForce = module.audioMinForce;
+            ropeComponent.audioMaxForce = module.audioMaxForce;
+            ropeComponent.audioMinSpeed = module.audioMinSpeed;
+            ropeComponent.audioMaxSpeed = module.audioMaxSpeed;
+
+        }
+
+
+        private void AssignRopeSimpleValuesFromModule(RopeSimple ropeComponent)
+        {
+
+            ropeComponent.minDistance = 0;
+            ropeComponent.spring = 0;
+            ropeComponent.damper = 0;
+
             //Debug.Log($"rope is given material: {material}");
             ropeComponent.material = material;
-            //ropeComponent.radius = module.radius;
-            //ropeComponent.tilingOffset = module.tilingOffset;
+            ropeComponent.radius = module.radius;
+            ropeComponent.tilingOffset = module.tilingOffset;
 
-            //ropeComponent.effectId = module.effectId;
-            //ropeComponent.audioMinForce = module.audioMinForce;
-            //ropeComponent.audioMaxForce = module.audioMaxForce;
-            //ropeComponent.audioMinSpeed = module.audioMinSpeed;
-            //ropeComponent.audioMaxSpeed = module.audioMaxSpeed;
+            ropeComponent.effectId = module.effectId;
+            ropeComponent.audioMinForce = module.audioMinForce;
+            ropeComponent.audioMaxForce = module.audioMaxForce;
+            ropeComponent.audioMinSpeed = module.audioMinSpeed;
+            ropeComponent.audioMaxSpeed = module.audioMaxSpeed;
         }
     }
 

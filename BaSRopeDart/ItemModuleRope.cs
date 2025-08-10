@@ -10,10 +10,11 @@ namespace BaSRopeDart
 {
     public class ItemModuleRope : ItemModule
     {
-        public float maxDistance;
-        public float minDistance = 0f;
-        public float spring = 10000f;
-        public float damper;
+
+        public float maxDistance = 10f;
+        public float minDistance = 0.01f;
+        public float spring = 6000f;
+        public float damper = 800f;
         public string materialAddress = "JojyGuyRopeMaterial";
         public float radius = 0.015f;
         public float tilingOffset = 10f;

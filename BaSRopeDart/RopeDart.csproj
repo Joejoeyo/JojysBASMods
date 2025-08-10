@@ -37,6 +37,24 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\BaS DLL references\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Sirenix.OdinInspector.Attributes">
+      <HintPath>..\..\BaS DLL references\Sirenix.OdinInspector.Attributes.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.OdinInspector.Modules.Unity.Addressables">
+      <HintPath>..\..\BaS DLL references\Sirenix.OdinInspector.Modules.Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.OdinInspector.Modules.UnityLocalization">
+      <HintPath>..\..\BaS DLL references\Sirenix.OdinInspector.Modules.UnityLocalization.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>..\..\BaS DLL references\Sirenix.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Serialization.Config">
+      <HintPath>..\..\BaS DLL references\Sirenix.Serialization.Config.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Utilities">
+      <HintPath>..\..\BaS DLL references\Sirenix.Utilities.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,6 +65,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="ThunderRoad">
       <HintPath>..\BaS DLL references\ThunderRoad.dll</HintPath>
+    </Reference>
+    <Reference Include="ThunderRoad.MaterialInstance">
+      <HintPath>..\..\BaS DLL references\ThunderRoad.MaterialInstance.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Addressables">
       <HintPath>..\BaS DLL references\Unity.Addressables.dll</HintPath>
