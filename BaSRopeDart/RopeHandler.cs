@@ -38,6 +38,17 @@ namespace BaSRopeDart
                     RemoveSmartRope(item);
                 }
             }
+            else if (item == ropeDart)
+            {
+                Debug.Log("Somehow ropeDart was holstered in itself??");
+                item.holder.UnSnap(item, true);
+            }
+            else if (attachedItems.Contains(item))
+            {
+                Debug.Log("Non-spool non-dart was holstered, swap snap to spool");
+                item.holder.UnSnap(item, true);
+                item.holder.Snap(ropeSpool, true); // i hope this triggers holder_snapped again..
+            }
             else
             {
                 Debug.Log("Non-matching item was snapped into rope dart, unsnapping");
@@ -153,8 +164,6 @@ namespace BaSRopeDart
             {
                 Transform ropePointA = GetRopePoint(itemA);
                 Transform ropePointB = GetRopePoint(itemB);
-                if (!itemB.TryGetCustomReference("RopePoint", out ropePointB))
-                    ropePointB = itemB.transform;
 
                 //RemoveRopeBetween(objectA, objectB);
                 RemoveSmartRope(itemA);
@@ -162,13 +171,14 @@ namespace BaSRopeDart
                 //add rope from A to B
 
                 objectA.SetActive(false);
-                RopeSmart ropeComponent = objectA.AddComponent<RopeSmart>();
+                RopeSmart ropeSmart = objectA.AddComponent<RopeSmart>();
 
-                AssignValuesFromModule(ropeComponent);
-                ropeComponent.objectA = objectA;
-                ropeComponent.objectB = objectB;
-                ropeComponent.ropePointA = ropePointA;
-                ropeComponent.ropePointB = ropePointB;
+                AssignValuesFromModule(ropeSmart);
+                ropeSmart.ropeHandler = this;
+                ropeSmart.objectA = objectA;
+                ropeSmart.objectB = objectB;
+                ropeSmart.ropePointA = ropePointA;
+                ropeSmart.ropePointB = ropePointB;
 
 
 
@@ -212,6 +222,8 @@ namespace BaSRopeDart
             ropeComponent.audioMaxSpeed = module.audioMaxSpeed;
 
             ropeComponent.enableCollision = module.enableCollisions;
+
+            ropeComponent.enableHandle = module.enableRopeHandle;
 
         }
 

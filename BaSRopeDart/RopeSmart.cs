@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ThunderRoad;
@@ -23,6 +24,8 @@ namespace BaSRopeDart
     class RopeSmart : MonoBehaviour
     {
         //technical stuff
+        public RopeHandler ropeHandler;
+
         public GameObject objectA;
         public GameObject objectB;
 
@@ -73,6 +76,7 @@ namespace BaSRopeDart
         public float maxDistance;
         public float minDistance;
         public bool enableCollision;
+        public bool enableHandle;
 
 
 
@@ -148,13 +152,20 @@ namespace BaSRopeDart
             //NEW STUFF
 
             //not sure if mesh is the best object to add the handle to, but i figure it's already in the right position and angle..?
-            lengthHandle = mesh.gameObject.AddComponent<Handle>();
+            if (enableHandle)
+            {
+                mesh.gameObject.SetActive(false);
+                lengthHandle = mesh.gameObject.AddComponent<Handle>();
 
-            lengthHandle.interactableId = "ClimbRopeVertical";
-            lengthHandle.axisLength = 10.0f; //this number doesn't seem to change anything
-            lengthHandle.orientationDefaultLeft = lengthHandle.AddOrientation(Side.Left, Vector3.zero, new Quaternion());
-            lengthHandle.orientationDefaultRight = lengthHandle.AddOrientation(Side.Right, Vector3.zero, new Quaternion());
+                lengthHandle.interactableId = "ClimbRopeVertical";
+                lengthHandle.axisLength = 0.1f; //this number doesn't seem to change anything
+                lengthHandle.orientationDefaultLeft = lengthHandle.AddOrientation(Side.Left, Vector3.zero, new Quaternion());
+                lengthHandle.orientationDefaultRight = lengthHandle.AddOrientation(Side.Right, Vector3.zero, new Quaternion());
+                lengthHandle.artificialDistance = -0.5f;
 
+
+                mesh.gameObject.SetActive(true);
+            }
         }
 
         //don't know when this gets called, just copying it from rope simple
@@ -235,18 +246,48 @@ namespace BaSRopeDart
             }
 
             //NEW STUFF
+            if (lengthHandle != null)
+            {
+                lengthHandle.transform.position = meshTransform.position;
+                lengthHandle.transform.rotation = meshTransform.rotation;
 
-            lengthHandle.transform.position = meshTransform.position;
-            lengthHandle.transform.rotation = meshTransform.rotation;
+                float safeDistance = Mathf.Max(0.01f, distance);
 
-            float safeDistance = Mathf.Max(0.1f, distance);
+                lengthHandle.axisLength = safeDistance;
 
-            lengthHandle.axisLength = safeDistance;
-            lengthHandle.SetTouchRadius(lengthHandle.touchRadius, true);
-
-            //lengthHandle.StartCoroutine(UpdateHandleLength());
-            //lengthHandle.SetTouchRadius(lengthHandle.touchRadius, true);
+                //RecalculateHandleCollider();
+                if (lengthHandle.touchCollider is CapsuleCollider capCol)
+                {
+                    capCol.height = lengthHandle.axisLength + lengthHandle.touchRadius;
+                }
+            }
+            
         }
 
+        public void RecalculateHandleCollider()
+        {
+            if (lengthHandle.touchCollider == null)
+            {
+                return;
+            }
+            Collider oldCollider = lengthHandle.touchCollider;
+            CapsuleCollider capCollider;
+            lengthHandle.touchCollider = lengthHandle.gameObject.AddComponent<CapsuleCollider>();
+            capCollider = (CapsuleCollider)lengthHandle.touchCollider;
+            capCollider.isTrigger = true;
+            capCollider.radius = lengthHandle.touchRadius;
+            capCollider.center = lengthHandle.touchCenter;
+            capCollider.height = lengthHandle.axisLength + lengthHandle.touchRadius;
+            capCollider.direction = 1;
+
+
+            DestroyImmediate(oldCollider);
+        }
+
+
+        public void SegmentGrabbed()
+        {
+
+        }
     }
 }

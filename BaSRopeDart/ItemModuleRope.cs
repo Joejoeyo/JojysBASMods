@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace BaSRopeDart
         public float audioMinSpeed = 0.25f;
         public float audioMaxSpeed = 2f;
         public bool enableCollisions = true;
+        public bool enableRopeHandle = true;
         public override void OnItemLoaded(Item item)
         {
             base.OnItemLoaded(item);
